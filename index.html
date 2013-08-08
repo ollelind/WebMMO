@@ -1,0 +1,150 @@
+<html style="width:100%;">
+<head>
+<title>Zombiez</title>
+</head>
+<body style="background-color:#DDD; width:100%;">
+Movement: W,A,S,D + Mouse
+		<canvas id="main_canvas" width="640" height="640" style="border:10px #CCC solid; margin:50 auto; width:640px; height:640px; display:block;"></canvas>
+</body>
+
+</html>
+
+
+<script src="Settings.js"></script>
+<script src="map.json"></script>
+<script src="player.js"></script>
+<script src="MapReader.js"></script>
+<script src="InputHandler.js"></script>
+<script src="SocketHandler.js"></script>
+<script type="text/javascript">
+
+
+var canvas = document.getElementById('main_canvas');
+var context = canvas.getContext('2d');
+
+var Game = new Settings();
+var Map = new MapReader(map);
+var Input = new InputHandler();
+var Player = new Player(Game.TILE_SIZE*(Game.GAME_SIZE/2), Game.TILE_SIZE*(Game.GAME_SIZE/2));
+
+var xOffset = 0;
+var yOffset = 0;
+
+var xPos = 0;
+var yPos = 0;
+
+
+
+var lastUpdatedTime = 0;
+var acDelta = 0;
+
+
+// The Game / animation loop
+window.requestAnimFrame = (function(){ 
+	return window.requestAnimationFrame || 
+	window.webkitRequestAnimationFrame || 
+	window.mozRequestAnimationFrame || 
+	window.oRequestAnimationFrame || 
+	window.msRequestAnimationFrame || 
+	function( callback ){ 
+		window.setTimeout(callback, 1000 / 60); 
+	}; })();
+
+
+function update(){
+	requestAnimFrame(update);
+	var playerMoving = false;
+
+
+	if(Input.left){
+		xPos--;
+		Player.setPosition(xPos, yPos);
+		if(xPos > 0 && !Map.frameIntersectsBlockage(Player.getBounds())){
+			playerMoving = true;
+		}else{
+			xPos++;
+			Player.setPosition(xPos, yPos);
+		}
+			
+	}
+	if(Input.right){
+		var rightBorder = (Map.width()*Game.TILE_SIZE) - (Game.GAME_SIZE*Game.TILE_SIZE);
+		xPos++;
+		Player.setPosition(xPos, yPos);
+		if(xPos < rightBorder && !Map.frameIntersectsBlockage(Player.getBounds())){
+			playerMoving = true;
+		}else{
+			xPos--;
+			Player.setPosition(xPos, yPos);
+		}
+	}
+	if(Input.up){
+		yPos--;
+		Player.setPosition(xPos, yPos);
+		if(yPos > 0  && !Map.frameIntersectsBlockage(Player.getBounds())){
+			playerMoving = true;
+		}else{
+			yPos++;
+			Player.setPosition(xPos, yPos);
+		}
+	}
+	if(Input.down){
+		
+		var bottomBorder = (Map.height()*Game.TILE_SIZE) - (Game.GAME_SIZE*Game.TILE_SIZE);
+		yPos++;
+		Player.setPosition(xPos, yPos);
+		if(yPos < bottomBorder && !Map.frameIntersectsBlockage(Player.getBounds())){
+			playerMoving = true;
+		}else{
+			yPos--;
+			Player.setPosition(xPos, yPos);
+		}
+	}
+
+	Player.moving = playerMoving;
+	draw();
+}
+update();
+
+
+function draw(){
+	context.save();
+	context.clearRect(0, 0, Game.GAME_SIZE*Game.TILE_SIZE, Game.GAME_SIZE*Game.TILE_SIZE);
+
+	context.translate(-xPos, -yPos);
+	Map.draw(context);
+	
+	drawSprites(context);
+
+	context.restore();
+	
+}
+
+function isVisible(x, y){
+	var startX = Math.floor(xPos/Game.TILE_SIZE);
+	var startY = Math.floor(yPos/Game.TILE_SIZE);
+	var stopX = startX + Game.GAME_SIZE;
+	var stopY = startY + Game.GAME_SIZE;
+	if(x >= startX && x <= stopX && y >= startY && y <= stopY){
+		return true;
+	}
+	return false;
+}
+
+function drawSprites(context){
+	var delta = Date.now() - lastUpdatedTime;
+	lastUpdatedTime = Date.now();
+	if(acDelta > Game.MS_PER_FRAME){
+		acDelta = 0;
+		player.nextFrame();
+	}else{
+		acDelta += delta;
+	}
+	player.draw(context);
+}
+
+document.getElementById('main_canvas').onmousemove = function(e){
+	Player.rotate(e.pageX - this.offsetLeft , e.pageY - this.offsetTop);
+};
+
+</script>
