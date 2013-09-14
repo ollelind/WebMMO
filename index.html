@@ -27,14 +27,6 @@ var Map = new MapReader(map);
 var Input = new InputHandler();
 var Player = new Player(Game.TILE_SIZE*(Game.GAME_SIZE/2), Game.TILE_SIZE*(Game.GAME_SIZE/2));
 
-var xOffset = 0;
-var yOffset = 0;
-
-var xPos = 0;
-var yPos = 0;
-
-
-
 var lastUpdatedTime = 0;
 var acDelta = 0;
 
@@ -53,9 +45,37 @@ window.requestAnimFrame = (function(){
 
 function update(){
 	requestAnimFrame(update);
-	var playerMoving = false;
 
+	var dX = 0;
+	var dY = 0;
 
+	var moving = false;
+	if(Input.left){
+		dX -= Player.speed;
+		moving = true;
+	}
+	if(Input.right){
+		dX += Player.speed;
+		moving = true;
+	}
+	if(Input.up){
+		dY -= Player.speed;
+		moving = true;
+	}
+	if(Input.down){
+		dY += Player.speed;
+		moving = true;
+	}
+
+	Player.moving = moving;
+	if(moving){
+		Player.setAngleForInput(Input);
+	}
+	
+
+	Player.xPos += dX;
+	Player.yPos += dY;
+	/*	var playerMoving = false;
 	if(Input.left){
 		xPos--;
 		Player.setPosition(xPos, yPos);
@@ -101,7 +121,7 @@ function update(){
 		}
 	}
 
-	Player.moving = playerMoving;
+	Player.moving = playerMoving;*/
 	draw();
 }
 update();
@@ -111,7 +131,7 @@ function draw(){
 	context.save();
 	context.clearRect(0, 0, Game.GAME_SIZE*Game.TILE_SIZE, Game.GAME_SIZE*Game.TILE_SIZE);
 
-	context.translate(-xPos, -yPos);
+	context.translate(-(Player.xPos - 320), -(Player.yPos - 320));
 	Map.draw(context);
 	
 	drawSprites(context);
@@ -120,31 +140,29 @@ function draw(){
 	
 }
 
-function isVisible(x, y){
-	var startX = Math.floor(xPos/Game.TILE_SIZE);
-	var startY = Math.floor(yPos/Game.TILE_SIZE);
-	var stopX = startX + Game.GAME_SIZE;
-	var stopY = startY + Game.GAME_SIZE;
-	if(x >= startX && x <= stopX && y >= startY && y <= stopY){
-		return true;
-	}
-	return false;
-}
 
 function drawSprites(context){
 	var delta = Date.now() - lastUpdatedTime;
 	lastUpdatedTime = Date.now();
 	if(acDelta > Game.MS_PER_FRAME){
 		acDelta = 0;
-		player.nextFrame();
+		Player.nextFrame();
 	}else{
 		acDelta += delta;
 	}
-	player.draw(context);
+	Player.draw(context);
 }
 
+
+window.addEventListener('keydown', function(e) {
+        Input.keyDown(e.keyCode);
+    }, false);
+
+	window.addEventListener('keyup', function(e) {
+        Input.keyUp(e.keyCode);
+    }, false);
 document.getElementById('main_canvas').onmousemove = function(e){
-	Player.rotate(e.pageX - this.offsetLeft , e.pageY - this.offsetTop);
+	//Player.rotate(e.pageX - this.offsetLeft , e.pageY - this.offsetTop);
 };
 
 </script>

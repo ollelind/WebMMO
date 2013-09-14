@@ -54,7 +54,7 @@ var MapReader = function(map){
 
 				if(isVisible(w, h)){
 					var ground = getGroundObjectForIdentifier(map.data[h][w]);
-					context.drawImage(this.tilemap, ground.getX(), ground.getY(), 32, 32, w*X_SIZE, h*Y_SIZE, 32, 32);
+					context.drawImage(this.tilemap, ground.getX(), ground.getY(), 32, 32, w*Game.TILE_SIZE, h*Game.TILE_SIZE, 32, 32);
 					
 				}
 				
@@ -63,10 +63,10 @@ var MapReader = function(map){
 	}
 
 	function isVisible(x, y){
-		var startX = Math.floor(xPos/X_SIZE);
-		var startY = Math.floor(yPos/Y_SIZE);
-		var stopX = startX + MAP_SIZE;
-		var stopY = startY + MAP_SIZE;
+		var startX = Math.floor((Player.xPos-320)/Game.TILE_SIZE);
+		var startY = Math.floor((Player.yPos-320)/Game.TILE_SIZE);
+		var stopX = startX + Game.GAME_SIZE;
+		var stopY = startY + Game.GAME_SIZE;
 		if(x >= startX && x <= stopX && y >= startY && y <= stopY){
 			return true;
 		}
@@ -193,10 +193,10 @@ function Ground(tile_x, tile_y, blocking, friction){
 	this.friction = friction;
 
 	this.getX = function(){
-		return tile_x * X_SIZE;
+		return tile_x * Game.TILE_SIZE;
 	}
 	this.getY = function(){
-		return tile_y * Y_SIZE;
+		return tile_y * Game.TILE_SIZE;
 	}
 }
 
@@ -210,9 +210,9 @@ function Obstacle(tile_x, tile_y, blocking, friction, movable, useable, descript
 	this.description = description;
 
 	this.getX = function(){
-		return tile_x * X_SIZE;
+		return tile_x * Game.TILE_SIZE;
 	}
 	this.getY = function(){
-		return tile_y * Y_SIZE;
+		return tile_y * Game.TILE_SIZE;
 	}
 }
