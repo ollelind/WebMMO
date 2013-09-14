@@ -16,6 +16,8 @@ Movement: W,A,S,D + Mouse
 <script src="MapReader.js"></script>
 <script src="InputHandler.js"></script>
 <script src="SocketHandler.js"></script>
+<script src="Projectile.js"></script>
+<script src="Castbar.js"></script>
 <script type="text/javascript">
 
 
@@ -26,6 +28,7 @@ var Game = new Settings();
 var Map = new MapReader(map);
 var Input = new InputHandler();
 var Player = new Player(Game.TILE_SIZE*(Game.GAME_SIZE/2), Game.TILE_SIZE*(Game.GAME_SIZE/2));
+var Castbar = new Castbar();
 
 var lastUpdatedTime = 0;
 var acDelta = 0;
@@ -68,13 +71,11 @@ function update(){
 	}
 
 	Player.moving = moving;
-	if(moving){
-		Player.setAngleForInput(Input);
-	}
+	Player.setAngleForInput(Input);
 	
-
 	Player.xPos += dX;
 	Player.yPos += dY;
+
 	/*	var playerMoving = false;
 	if(Input.left){
 		xPos--;
@@ -122,6 +123,7 @@ function update(){
 	}
 
 	Player.moving = playerMoving;*/
+	Player.update();
 	draw();
 }
 update();
@@ -133,11 +135,11 @@ function draw(){
 
 	context.translate(-(Player.xPos - 320), -(Player.yPos - 320));
 	Map.draw(context);
+	Castbar.draw(context, this.offsetLeft, this.offsetTop);
 	
 	drawSprites(context);
 
 	context.restore();
-	
 }
 
 
@@ -151,6 +153,11 @@ function drawSprites(context){
 		acDelta += delta;
 	}
 	Player.draw(context);
+
+	for(var i=0; i<Player.projectiles.length; i++){
+		var p = Player.projectiles[i];
+		p.draw(context);
+	}
 }
 
 
@@ -163,6 +170,18 @@ window.addEventListener('keydown', function(e) {
     }, false);
 document.getElementById('main_canvas').onmousemove = function(e){
 	//Player.rotate(e.pageX - this.offsetLeft , e.pageY - this.offsetTop);
+	Input.mouseX = e.pageX - this.offsetLeft;
+	Input.mouseY = e.pageY - this.offsetTop;
 };
+document.getElementById('main_canvas').onmousedown = function(e){
+	Input.mouseDown = true;
+}
+document.getElementById('main_canvas').onmouseup = function(e){
+	Input.mouseDown = false;
+	Player.casting = 0;
+	Castbar.percentage = 0;
+}
+
+
 
 </script>

@@ -38,6 +38,10 @@ var MapReader = function(map){
 		return false;
 	}
 
+	this.collisionDetection = function(x, y, radius){
+		
+	}
+
 	function getTileForCoords(x, y){
 		var tileX = Math.floor(x/X_SIZE);
 		var tileY = Math.floor(y/Y_SIZE);

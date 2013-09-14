@@ -4,6 +4,9 @@ function InputHandler(){
 	this.right = false;
 	this.up = false;
 	this.down = false;
+    this.mouseX;
+    this.mouseY;
+    this.mouseDown = false;
 
 	var LEFT = 65;
 	var RIGHT = 68;

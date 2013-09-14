@@ -7,6 +7,8 @@ var Player = function(xPos, yPos){
 	this.targetAngle = 0.0;
 	this.radius = 20;
 	this.speed = 1.0;
+	this.projectiles = new Array();
+	this.casting = 0;
 
 	this.moving = false;
 
@@ -35,12 +37,15 @@ var Player = function(xPos, yPos){
 
 	}
 
-	this.rotate = function(x, y){
-		var deltaX = x - (this.xPos+20) + (this.xPos-320);
-		var deltaY = y- (this.yPos+15) + (this.yPos-320);
-		var deg = -Math.atan2(deltaX, deltaY) + Math.PI/2;
-
-		this.angle = deg;
+	this.update = function(){
+		if(Input.mouseDown){
+			this.casting += 0.02;
+			Castbar.percentage = this.casting;
+			if(this.casting >= 1.0){
+				this.casting = 0;
+				this.shoot(Input.mouseX, Input.mouseY);
+			}
+		}
 	}
 
 	this.rotateIfNeeded = function(){
@@ -53,9 +58,9 @@ var Player = function(xPos, yPos){
 		// If the angle difference is less then one iteration, make them equal, so that the angle wont to over the target.
 		if(diff > 0.2 && Math.abs(diffAngle) > 0.1){
 			if(diffAngle > 0){
-				this.angle += 0.1;
+				this.angle += 0.2;
 			}else{
-				this.angle -= 0.1;
+				this.angle -= 0.2;
 			}
 		}else{
 			this.angle = this.targetAngle;
@@ -63,7 +68,12 @@ var Player = function(xPos, yPos){
 	}
 
 	this.setAngleForInput = function(input){
-		if(input.up && input.right){
+		if(input.mouseDown){
+			var deltaX = input.mouseX - (this.xPos+20) + (this.xPos-320);
+			var deltaY = input.mouseY - (this.yPos+15) + (this.yPos-320);
+			this.targetAngle = -Math.atan2(deltaX, deltaY) + Math.PI/2;
+		}
+		else if(input.up && input.right){
 			this.targetAngle = -Math.PI/4;
 		}
 		else if(input.up && input.left){
@@ -87,6 +97,17 @@ var Player = function(xPos, yPos){
 		else if(input.right){
 			this.targetAngle = 0;
 		}
+	}
+
+	this.shoot = function(targetX, targetY){
+
+		var deltaX = targetX -320;
+		var deltaY = targetY -320;
+		var dx = deltaX / Math.sqrt(Math.pow(deltaX,2) + Math.pow(deltaY,2));
+		var dy = deltaY / Math.sqrt(Math.pow(deltaX,2) + Math.pow(deltaY,2));
+		var angle = -Math.atan2(deltaX, deltaY) + Math.PI/2;
+		var projectile = new Projectile(this.xPos, this.yPos, dx, dy, angle);
+		this.projectiles.push(projectile);
 	}
 
 	this.setPosition = function(x, y){
